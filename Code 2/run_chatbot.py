@@ -14,7 +14,7 @@ def check_embeddings():
         print("⚠️ Missing embeddings! Generating them now...")
         dataset_path = "../Data/processed/movies_dataset_final.csv"
         movie_df = load_movie_dataset(dataset_path)
-
+    
         embedder = MovieEmbedder()
         embeddings = embedder.generate_embeddings(movie_df)
         embedder.save_embeddings(embeddings, movie_df)

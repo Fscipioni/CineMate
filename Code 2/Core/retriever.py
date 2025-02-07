@@ -6,7 +6,7 @@ from sentence_transformers import SentenceTransformer
 
 
 class MovieRetriever:
-    def __init__(self, model_name="intfloat/e5-large-v2", index_path="Data/embeddings/faiss_index.bin", metadata_path="Data/embeddings/movie_metadata.pkl"):
+    def __init__(self, model_name="intfloat/e5-large-v2", index_path="../Data/embeddings/faiss_index.bin", metadata_path="../Data/embeddings/movie_metadata.pkl"):
         """
         Loads FAISS index and metadata for similarity search.
         """
