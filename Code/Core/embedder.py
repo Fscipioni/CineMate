@@ -4,7 +4,6 @@ from sentence_transformers import SentenceTransformer
 import faiss
 import numpy as np
 import pickle
-from .data_loader import load_movie_dataset
 
 class MovieEmbedder:
     def __init__(self, model_name="intfloat/e5-large-v2"):
