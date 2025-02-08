@@ -4,6 +4,7 @@ from sentence_transformers import SentenceTransformer
 import faiss
 import numpy as np
 import pickle
+import os
 
 class MovieEmbedder:
     def __init__(self, model_name="intfloat/e5-large-v2"):
@@ -49,12 +50,4 @@ class MovieEmbedder:
         with open(metadata_path, "wb") as f:
             pickle.dump(movie_metadata, f)
 
-        print(f"Embeddings and metadata saved successfully!")
-
-# if __name__ == "__main__":
-#     dataset_path = "../Data/processed/movies_dataset_final.csv"
-#     movie_df = load_movie_dataset(dataset_path)
-
-#     embedder = MovieEmbedder()
-#     embeddings = embedder.generate_embeddings(movie_df)
-#     embedder.save_embeddings_metadata(embeddings, movie_df)
+        print(f"Embeddings and metadata saved successfully!") 

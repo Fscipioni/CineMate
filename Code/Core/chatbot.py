@@ -2,11 +2,14 @@ from Core.retriever import MovieRetriever
 
 class MovieChatbot:
     def __init__(self):
+        """
+        Initializes the chatbot with a movie retriever.
+        """
         self.retriever = MovieRetriever()
 
     def generate_movie_response(self, movie):
         """
-        Generates a detailed response for a recommended movie.
+        Generates a formatted response for a recommended movie.
 
         Parameters:
             movie (dict): Movie metadata.

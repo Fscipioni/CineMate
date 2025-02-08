@@ -3,7 +3,7 @@ import pickle
 import numpy as np
 import torch
 from sentence_transformers import SentenceTransformer
-
+import os
 
 class MovieRetriever:
     def __init__(self, model_name="intfloat/e5-large-v2", index_path="../Data/embeddings/faiss_index.bin", metadata_path="../Data/embeddings/movie_metadata.pkl"):
@@ -11,6 +11,10 @@ class MovieRetriever:
         Loads FAISS index and metadata for similarity search.
         """
         self.model = SentenceTransformer(model_name, device="cuda" if torch.cuda.is_available() else "cpu")
+
+        if not os.path.exists(index_path) or not os.path.exists(metadata_path):
+            raise FileNotFoundError("Error: FAISS index or metadata not found. Run the embedding generator first.")
+
         self.index = faiss.read_index(index_path)
 
         # Load movie metadata
@@ -32,13 +36,4 @@ class MovieRetriever:
         distances, indices = self.index.search(query_embedding, top_k)
 
         results = [self.movie_metadata[idx] for idx in indices[0]]
-        return results
-
-if __name__ == "__main__":
-    retriever = MovieRetriever()
-    query = "A sci-fi movie about AI and robots"
-    similar_movies = retriever.search_movies(query)
-
-    print("\n🎬 Recommended Movies:")
-    for movie in similar_movies:
-        print(f"{movie['title']} ({movie['year']}) - {movie['genre']}")
+        return results 

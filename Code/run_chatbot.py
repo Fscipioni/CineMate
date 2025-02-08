@@ -13,8 +13,12 @@ def check_embeddings():
     if not os.path.exists(embeddings_path) or not os.path.exists(metadata_path):
         print("⚠️ Missing embeddings! Generating them now...")
         dataset_path = "../Data/processed/movies_dataset_final.csv"
+
+        if not os.path.exists(dataset_path):
+            raise FileNotFoundError(f"Dataset not found: {dataset_path}")
+
         movie_df = load_movie_dataset(dataset_path)
-    
+
         embedder = MovieEmbedder()
         embeddings = embedder.generate_embeddings(movie_df)
         embedder.save_embeddings_metadata(embeddings, movie_df)
