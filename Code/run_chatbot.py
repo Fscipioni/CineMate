@@ -17,7 +17,7 @@ def check_embeddings():
     
         embedder = MovieEmbedder()
         embeddings = embedder.generate_embeddings(movie_df)
-        embedder.save_embeddings(embeddings, movie_df)
+        embedder.save_embeddings_metadata(embeddings, movie_df)
 
         print("✅ Embeddings generated successfully!")
 

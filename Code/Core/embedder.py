@@ -27,7 +27,7 @@ class MovieEmbedder:
         embeddings = self.model.encode(movie_df["embedding_text"].tolist(), convert_to_numpy=True)
         return embeddings
 
-    def save_embeddings(self, embeddings, movie_df, index_path="../Data/embeddings/faiss_index.bin", metadata_path="../Data/embeddings/movie_metadata.pkl"):
+    def save_embeddings_metadata(self, embeddings, movie_df, index_path="../Data/embeddings/faiss_index.bin", metadata_path="../Data/embeddings/movie_metadata.pkl"):
         """
         Stores embeddings in FAISS and saves movie metadata separately.
 
@@ -57,4 +57,4 @@ class MovieEmbedder:
 
 #     embedder = MovieEmbedder()
 #     embeddings = embedder.generate_embeddings(movie_df)
-#     embedder.save_embeddings(embeddings, movie_df)
+#     embedder.save_embeddings_metadata(embeddings, movie_df)
