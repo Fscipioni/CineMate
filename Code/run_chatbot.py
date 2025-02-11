@@ -11,32 +11,21 @@ def check_embeddings():
     metadata_path = "../Data/embeddings/movie_metadata.pkl"
 
     if not os.path.exists(embeddings_path) or not os.path.exists(metadata_path):
-        print("⚠️ Missing embeddings! Generating them now...")
-        dataset_path = "../Data/processed/movies_dataset_final.csv"
-
-        if not os.path.exists(dataset_path):
-            raise FileNotFoundError(f"Dataset not found: {dataset_path}")
-
-        movie_df = load_movie_dataset(dataset_path)
-
+        print("⚠️ Embeddings not found, generating them now...")
+        dataset = load_movie_dataset("../Data/movies.csv")
         embedder = MovieEmbedder()
-        embeddings = embedder.generate_embeddings(movie_df)
-        embedder.save_embeddings_metadata(embeddings, movie_df)
-
-        print("✅ Embeddings generated successfully!")
-
-def run_chatbot():
-    """
-    Initializes and runs the CineMate chatbot.
-    """
-    print("\n🎬 CineMate - Your Personal Movie Assistant 🎥")
-    print("🔍 Find movies based on their plot, genre, director, or actors.")
-    print("💬 Type 'exit' anytime to quit.\n")
-
-    check_embeddings()  # Ensure embeddings exist before running
-
-    bot = MovieChatbot()
-    bot.chat()
+        embeddings = embedder.generate_embeddings(dataset["plot"].fillna("No description available").tolist())
+        metadata = dataset.to_dict(orient="records")
+        embedder.save_faiss_index(embeddings, metadata, embeddings_path, metadata_path)
+        print("✅ Embeddings successfully generated and stored.")
 
 if __name__ == "__main__":
-    run_chatbot()
+    check_embeddings()
+    chatbot = MovieChatbot()
+    while True:
+        user_query = input("Ask about a movie: ")
+        if user_query.lower() in ["exit", "quit"]:
+            print("Goodbye!")
+            break
+        response = chatbot.chat(user_query)
+        print("Bot:", response, flush=True)

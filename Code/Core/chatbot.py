@@ -1,61 +1,28 @@
 from Core.retriever import MovieRetriever
+from transformers import AutoTokenizer, AutoModelForCausalLM
+import torch
 
 class MovieChatbot:
-    def __init__(self):
+    def __init__(self, llm_model="tiiuae/falcon-7b-instruct"):
         """
-        Initializes the chatbot with a movie retriever.
+        Initializes the chatbot with a movie retriever and an LLM.
         """
         self.retriever = MovieRetriever()
+        self.device = "mps" if torch.backends.mps.is_available() else "cpu"
 
-    def generate_movie_response(self, movie):
+        self.tokenizer = AutoTokenizer.from_pretrained(llm_model)
+        self.model = AutoModelForCausalLM.from_pretrained(llm_model, torch_dtype=torch.float16, device_map=self.device)
+
+    def chat(self, user_query):
         """
-        Generates a formatted response for a recommended movie.
-
-        Parameters:
-            movie (dict): Movie metadata.
-
-        Returns:
-            str: Formatted movie description.
+        Processes user query, retrieves relevant movie, and formulates a response.
         """
-        title = movie.get("title", "Unknown Title")
-        year = movie.get("year", "Unknown Year")
-        genre = movie.get("genre", "Unknown Genre")
-        director = movie.get("director", "Unknown Director")
-        actors = movie.get("actors", "Unknown Actors")
-        country = movie.get("country", "Unknown Country")
-        awards = movie.get("awards", "No awards information available")
-        rating = movie.get("rating", "N/A")
-        votes = movie.get("votes", "N/A")
-
-        return (
-            f"🎬 *{title}* ({year}) is a *{genre}* movie from {country}.\n"
-            f"🎥 Directed by {director}, starring {actors}.\n"
-            f"🏆 {awards}.\n"
-            f"⭐ IMDb Rating: {rating} (based on {votes} votes)."
-        )
-
-    def chat(self):
-        """
-        Runs the interactive chatbot session.
-        """
-        print("🎥 Welcome to CineMate! Type 'exit' to quit.")
-        while True:
-            query = input("\n🔍 Ask for a movie recommendation: ")
-            if query.lower() == "exit":
-                print("👋 Goodbye!")
-                break
-
-            recommendations = self.retriever.search_movies(query)
-
-            if not recommendations:
-                print("⚠️ No matching movies found. Try a different query!")
-                continue
-
-            print("\n🎬 Recommended Movies:")
-            for movie in recommendations:
-                print(self.generate_movie_response(movie))
-                print("\n" + "-" * 50)
-
-if __name__ == "__main__":
-    bot = MovieChatbot()
-    bot.chat()
+        movie = self.retriever.retrieve_movie(user_query)
+        if not movie:
+            return "I'm sorry, I couldn't find a relevant movie for your query."
+        
+        prompt = f"Tell me about the movie: {movie['title']}. {movie['plot']}"
+        inputs = self.tokenizer(prompt, return_tensors="pt").to(self.device)
+        with torch.no_grad():
+            response_ids = self.model.generate(**inputs, max_new_tokens=50)
+        return self.tokenizer.decode(response_ids[0], skip_special_tokens=True)

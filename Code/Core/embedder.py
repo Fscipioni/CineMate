@@ -1,9 +1,9 @@
 import pandas as pd
 import torch
-from sentence_transformers import SentenceTransformer
 import faiss
 import numpy as np
 import pickle
+from sentence_transformers import SentenceTransformer
 import os
 
 class MovieEmbedder:
@@ -12,42 +12,14 @@ class MovieEmbedder:
         Initializes the embedding model and FAISS index.
         """
         self.model = SentenceTransformer(model_name, device="cuda" if torch.cuda.is_available() else "cpu")
-        self.index = None  # FAISS index will be created later
+        self.index = None  
 
-    def generate_embeddings(self, movie_df):
-        """
-        Generates embeddings for the movie dataset.
+    def generate_embeddings(self, movie_plots):
+        return self.model.encode(movie_plots, convert_to_numpy=True)
 
-        Parameters:
-            movie_df (pd.DataFrame): The movie dataframe with metadata.
-
-        Returns:
-            np.ndarray: Numpy array of movie embeddings.
-        """
-        print("Generating embeddings...")
-        embeddings = self.model.encode(movie_df["embedding_text"].tolist(), convert_to_numpy=True)
-        return embeddings
-
-    def save_embeddings_metadata(self, embeddings, movie_df, index_path="../Data/embeddings/faiss_index.bin", metadata_path="../Data/embeddings/movie_metadata.pkl"):
-        """
-        Stores embeddings in FAISS and saves movie metadata separately.
-
-        Parameters:
-            embeddings (np.ndarray): Generated embeddings.
-            movie_df (pd.DataFrame): Movie dataset with metadata.
-        """
-        d = embeddings.shape[1]  # Embedding dimensions
-        self.index = faiss.IndexFlatL2(d)
-        self.index.add(embeddings)
-
-        # Save FAISS index
-        faiss.write_index(self.index, index_path)
-
-        # Store full metadata (excluding embeddings)
-        movie_metadata = movie_df[['tconst', 'title', 'year', 'genre', 'director', 'actors', 
-                                   'plot', 'country', 'awards', 'rating', 'votes']].to_dict(orient='records')
-
+    def save_faiss_index(self, embeddings, metadata, index_path, metadata_path):
+        index = faiss.IndexFlatL2(embeddings.shape[1])
+        index.add(embeddings)
+        faiss.write_index(index, index_path)
         with open(metadata_path, "wb") as f:
-            pickle.dump(movie_metadata, f)
-
-        print(f"Embeddings and metadata saved successfully!") 
+            pickle.dump(metadata, f)
