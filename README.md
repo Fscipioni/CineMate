@@ -1,5 +1,5 @@
 # CineMate
-Movie Recommendation Chatbot
+Movie Recommendation Chatbot using RAG - Work in progress
 
 
 
